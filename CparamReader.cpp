@@ -6,9 +6,20 @@
  *  Modified: 26 Nov 2014
  *		Author: Jie Yang
  */
+#include <iostream>
+
+#include <string.h>
+
+#include <vector>
+#include <string>
+#include <stdlib.h>
+#include <cstdlib>
+#include <sstream>
+#include <numeric>
 
 #include "CParamReader.h"
-#include <string.h>
+
+using namespace std;
 
 // Class Constructor
 CParamReader::CParamReader()
@@ -56,46 +67,106 @@ char* CParamReader::getParamString(const char* paramName, int& nElements)
 	if(!paramFileStream.is_open())
 		return NULL;
 
-	//int paramLength = strlen(paramName);
 
+	// Declare variables needed 
+	int paramLength = strlen(paramName);
 	bool found = false;
 	char* paramString = NULL;
+	char* paramContainer = NULL;
+	char charContainer[1000];
 	char* token;
+	int count;
+	int nullTerminal;
+
+
 	// Run through the lines of the file for the parameter
 	while(!paramFileStream.eof() && !found)
 	{
 		paramFileStream.getline(paramBuffer,BUFFER_SIZE-1);
-		token = strtok(paramBuffer,"\t");
+		token = strtok(paramBuffer,"\t");		// This reads the first bit until 'tab' "\t"
+		
 		// Anything on this line?
 		if(token!=NULL)
 		{
 			// Line doesn't begin with # and matches param name?
-			if(token[0]!='#' && strcmp(paramName,token)==0)
+			if(token[0]!='#'&& token[0]!=';' && strcmp(paramName,token)==0)
 			{
-				// Found it!
+				int count=0;
+				cout << "Token: " << token << endl;
+					
+
+				while (token[0]!=';')
+				{
+
+					// Lets get the next line and first line of data
+					paramFileStream.getline(paramBuffer,BUFFER_SIZE-1);
+					cout << "Token: " << token << endl;
+					paramString = strtok(token,"\t");
+					cout << "paramString: " << paramString << endl;
+
+					if (token[0]!=';'){
+					
+
+						// 24/04/15: Remove any extra spaces from the end of the string (as long as the string isn't zero length).
+						nullTerminal = strlen(paramString);		// This gets the length of the char string
+						cout << "nullTerminal: " << nullTerminal << endl;
+						while(paramString[nullTerminal-1]==' ')  // This removes all extra spaces 
+						{
+							nullTerminal--;							// means minus minus (e.g. from 3 to 2)
+							cout << "we removed the spaces " << endl;
+							cout << "nullTerminal: " << nullTerminal << endl;
+						}
+
+						paramString[nullTerminal] = '\0';		// ends the string in a specific way
+		
+						
+
+
+						// Lets add this data to the paramContainer
+						if (count==0)
+						{
+							strcpy(charContainer, paramString);
+						}
+						else if (count>0)
+						{
+							strcat(charContainer, " ");
+							strcat(charContainer, paramString);
+						}
+						count++;
+			
+
+						cout << "Round 2: " << endl;
+						cout << "ParamStr: \t" << paramString << endl;
+						cout << "Container: \t" << charContainer << endl; 
+
+					}
+					else
+					{
+						found = true;
+						paramContainer=charContainer;
+						cout << "FINAL: " << charContainer << endl;
+					}
+
+				}
 				found = true;
-				paramString = strtok(NULL,"\t");
 			}
 		}
 	}
 
-	// 24/04/15: Remove any extra spaces from the end of the string (as long as the string isn't zero length).
-	int nullTerminal = strlen(paramString);
-	while(paramString[nullTerminal-1]==' ')
-		nullTerminal--;
-
-	paramString[nullTerminal] = '\0';
 
 	// count the spaces. Single space separates values so length of vector is #spaces + 1.
-	int count = 0;
+	nullTerminal = strlen(paramContainer);		// This gets the length of the char string
+	int count2 = 0;
 	for(int j=0;j<nullTerminal;j++)
-		if(paramString[j]==' ') count++;
+		if(paramContainer[j]==' ') count2++;
 
-	nElements = count+ 1;
+	//nElements = count+ 1;
+	nElements=count2 + 1;
+	cout << "NElements: " << nElements << endl;
 
 	paramFileStream.close();
 
-	return paramString;
+	return paramContainer;
 }
 
 
