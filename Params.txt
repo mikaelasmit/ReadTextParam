@@ -4,11 +4,8 @@
 
 ## Each informative line of the param file should have the form:
 
-## paramNumber (tab) Value (tab) ## Comments
+## paramNumber (ENTRE) Value (space) (ENTRE) [repeat until all rows inserts - seperate blocks with a SPACE] ## Comments
 
-## OR
-
-## paramNumber (tab) Value1 (space) Value2 (tab) ## Comments
 
 ## Any line starting with '#' is completely ignored.
 
@@ -21,6 +18,10 @@ demog_eta	0.05	## params for survival curve. WAS 9.88
 demog_b	0.0045	## params for survival curve.
 
 vectorTest
+0.5 0.4 1.0 5.6
+5.0 8.0 3.0 4.3
+3.0 4.0 6.0 1.2
+ 
 0.5 0.4 1.0 5.6
 5.0 8.0 3.0 4.3
 3.0 4.0 6.0 1.2
