@@ -59,7 +59,7 @@ bool CParamReader::setNewFileName(char* filePath)
 }
 
 // Return a string containing parameter data or NULL and also the length of the vector.
-char* CParamReader::getParamString(const char* paramName, int& nElements)
+char* CParamReader::getParamString(const char* paramName, int& nElements, int& rows, int& columns)
 {
     // Do we have a file attached?
     paramFileStream.open(filePathString);
@@ -75,7 +75,7 @@ char* CParamReader::getParamString(const char* paramName, int& nElements)
     string paramContainer;
     //char charContainer[1000];
     char* token;
-    int count;
+    //int count;
     int nullTerminal;
     
     
@@ -91,7 +91,8 @@ char* CParamReader::getParamString(const char* paramName, int& nElements)
             // Line doesn't begin with # and matches param name?
             if(token[0]!='#'&& token[0]!=';' && strcmp(paramName,token)==0)
             {
-                int count=0;
+                columns=0;
+				rows=0;
                 cout << "Token: " << token << endl;
                 
                 
@@ -123,13 +124,24 @@ char* CParamReader::getParamString(const char* paramName, int& nElements)
                         
                         
                         // Lets add this data to the paramContainer
-                        if (count==0)
+                        if (rows==0)
                         {
-                            //strcpy(charContainer, paramString);
                             paramContainer=token;
-                            cout << "ParamContainer: " << paramContainer << endl;
+                            nullTerminal=paramContainer.length();
+                            cout << "Terminal length: " << nullTerminal << endl;
+                            columns=0;
+                            for(int c=0; c<nullTerminal; c++)
+                            {
+                                if (paramContainer[c]==' ')
+                                {
+                                    columns++;
+                                    cout << "Columns!!!: " << columns << " C: " << c << endl;
+                                }
+                            }
+                            columns=columns+1;
+                            cout << "!!!ParamContainer: " << paramContainer << " nr_columns: " << columns << endl;
                         }
-                        else if (count>0)
+                        else if (rows>0)
                         {
                             
                             paramString=token;
@@ -140,7 +152,7 @@ char* CParamReader::getParamString(const char* paramName, int& nElements)
                             //strcat(charContainer, " ");
                             //strcat(charContainer, paramString);
                         }
-                        count++;
+                        rows++;
                         
                         
                         cout << "Round 2: " << endl;
@@ -153,7 +165,7 @@ char* CParamReader::getParamString(const char* paramName, int& nElements)
                         found = true;
                         paramContainer=paramContainer;
 ;
-                        cout << "FINAL: " <<paramContainer << endl;
+                        cout << "FINAL: " <<paramContainer << " rows: " << rows << " columns: " << columns << endl;
                     }
                     
                 }
@@ -166,13 +178,14 @@ char* CParamReader::getParamString(const char* paramName, int& nElements)
     // count the spaces. Single space separates values so length of vector is #spaces + 1.
     char* charContainer = new char[paramContainer.length() +1];
     strcpy(charContainer, paramContainer.c_str());
+	cout << "charContainer: " << charContainer << endl;
     nullTerminal = strlen(charContainer);		// This gets the length of the char string
-    int count2 = 0;
+    int count = 0;
     for(int j=0;j<nullTerminal;j++)
-        if(paramContainer[j]==' ') count2++;
+        if(paramContainer[j]==' ') count++;
     
     //nElements = count+ 1;
-    nElements=count2 + 1;
+    nElements=count + 1;
     cout << "NElements: " << nElements << endl;
     
     paramFileStream.close();

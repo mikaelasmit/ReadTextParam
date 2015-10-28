@@ -38,23 +38,17 @@ int main()
 
     
 
-    /*char paramName[] = "demog_eta";
-
-    int length;
-
-    char* myValue = myReader.getParamString(paramName, length);
-
-    cout << paramName << " = " << myValue << ": length = " << length << endl;*/
-
     
 
     //char v[] = "vectorTest";
     char ParamName[] = "vectorTest";
-    int length;
+    int length ;
+    int nr_rows;
+    int nr_columns;
 
-    char* myValue = myReader.getParamString(ParamName,length);
+    char* myValue = myReader.getParamString(ParamName,length, nr_rows, nr_columns);
 
-    cout << ParamName << " = " << myValue << ": length = " << length << endl;
+    cout << ParamName << " = " << myValue << ": length = " << length << " nr_rows: " << nr_rows << " nr_columns: " << nr_columns << endl;
     
     // Lets convert string to vector
     //string ParamStr;
