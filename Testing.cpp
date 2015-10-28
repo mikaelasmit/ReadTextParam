@@ -48,7 +48,7 @@ int main()
 
     char* myValue = myReader.getParamString(ParamName,length, nr_rows, nr_columns);
 
-    cout << ParamName << " = " << myValue << ": length = " << length << " nr_rows: " << nr_rows << " nr_columns: " << nr_columns << endl;
+    cout << "FINAL!!!: " << ParamName << " = " << myValue << ": length = " << length << " nr_rows: " << nr_rows << " nr_columns: " << nr_columns << endl;
     
     // Lets convert string to vector
     //string ParamStr;
@@ -68,7 +68,7 @@ int main()
     
     cout << myValue << endl;
     
-	system("pause");
+
     return 0;
 
 }
