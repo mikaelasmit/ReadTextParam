@@ -68,7 +68,7 @@ int main()
     
     cout << myValue << endl;
     
-
+	system("pause");
     return 0;
 
 }

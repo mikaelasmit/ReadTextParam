@@ -7,16 +7,9 @@
  *		Author: Jie Yang
  */
 #include <iostream>
-
 #include <string.h>
-
 #include <vector>
 #include <string>
-#include <stdlib.h>
-#include <cstdlib>
-#include <sstream>
-#include <numeric>
-
 #include "CParamReader.h"
 
 using namespace std;
@@ -73,120 +66,81 @@ char* CParamReader::getParamString(const char* paramName, int& nElements, int& r
     bool found = false;
     string paramString;
     string paramContainer;
-    //char charContainer[1000];
     char* token;
-    //int count;
     int nullTerminal;
     
     
     // Run through the lines of the file for the parameter
     while(!paramFileStream.eof() && !found)
     {
-        paramFileStream.getline(paramBuffer,BUFFER_SIZE-1);
-        token = strtok(paramBuffer,"\t");		// This reads the first bit until 'tab' "\t"
+        paramFileStream.getline(paramBuffer,BUFFER_SIZE-1);		// this updates 'token'
+        token = strtok(paramBuffer,"\t");						// This reads the first bit until 'tab' "\t" - i.e. the variable name for the new variable
         
         // Anything on this line?
         if(token!=NULL)
         {
-            // Line doesn't begin with # and matches param name?
+            // Line doesn't begin with # or ; and matches param name?
             if(token[0]!='#'&& token[0]!=';' && strcmp(paramName,token)==0)
             {
-                columns=0;
+                columns=0;					// Initialise the rows and columns back to 0
 				rows=0;
-                cout << "Token: " << token << endl;
                 
                 
                 while (token[0]!=';')
                 {
                     
-                    // Lets get the next line and first line of data
-                    paramFileStream.getline(paramBuffer,BUFFER_SIZE-1);
-                    cout << "Token: " << token << endl;
-                    paramString = strtok(token,"\t");
-                    cout << "paramString: " << paramString << endl;
+                    // 1. Lets get the next line and first line of data
+                    paramFileStream.getline(paramBuffer,BUFFER_SIZE-1);		// this updates 'token'
+                    paramString = strtok(token,"\t");						// copy it to temporary 'holding' container
                     
+					// We will run this until we find the ; - which annotes end of the variable data
                     if (token[0]!=';'){
                         
+                        // 2. Remove any extra spaces from the end of the string (as long as the string isn't zero length).
+                        nullTerminal = strlen(token);						// This gets the length of the char string
+                        while(token[nullTerminal-1]==' '){nullTerminal--;}	// This find the extra spaces at the end and deletes it									
+                        token[nullTerminal] = '\0';							// ends the string in a specific way
+
                         
-                        // 24/04/15: Remove any extra spaces from the end of the string (as long as the string isn't zero length).
-                        nullTerminal = strlen(token);		// This gets the length of the char string
-                        cout << "nullTerminal: " << nullTerminal << endl;
-                        while(token[nullTerminal-1]==' ')  // This removes all extra spaces
-                        {
-                            nullTerminal--;							// means minus minus (e.g. from 3 to 2)
-                            cout << "we removed the spaces " << endl;
-                            cout << "nullTerminal: " << nullTerminal << endl;
-                        }
-                        
-                        token[nullTerminal] = '\0';		// ends the string in a specific way
-                        
-                        
-                        
-                        
-                        // Lets add this data to the paramContainer
+                        // 3. Lets add this data to the paramContainer
                         if (rows==0)
                         {
-                            paramContainer=token;
-                            nullTerminal=paramContainer.length();
-                            cout << "Terminal length: " << nullTerminal << endl;
-                            columns=0;
+                            paramContainer=paramString;		// Copy to the final 'long' holiday container
+                            
+							// 4. Lets count the number of elemnts in this line to get nr_columns
+							nullTerminal=paramContainer.length();
                             for(int c=0; c<nullTerminal; c++)
-                            {
-                                if (paramContainer[c]==' ')
-                                {
-                                    columns++;
-                                    cout << "Columns!!!: " << columns << " C: " << c << endl;
-                                }
-                            }
-                            columns=columns+1;
-                            cout << "!!!ParamContainer: " << paramContainer << " nr_columns: " << columns << endl;
+                            {if (paramContainer[c]==' '){columns++;}                            }
+                            columns=columns+1;				// Need to add 1 element at the end
                         }
-                        else if (rows>0)
+                        
+						// 5. Lets add the next lines to the holding container
+						else if (rows>0)
                         {
-                            
-                            paramString=token;
-                            paramContainer.append(" ");
-                            paramContainer.append(paramString);
-                            cout << "ParamString: " << paramString << " and paramContainer: " << paramContainer << endl;
-                            
-                            //strcat(charContainer, " ");
-                            //strcat(charContainer, paramString);
+                            paramContainer.append(" ");			// First we need to add a space at the end - otherwise it will stick 2 numbers together
+                            paramContainer.append(paramString);	// Now we add the new line to the end of the long holding container
                         }
-                        rows++;
                         
-                        
-                        cout << "Round 2: " << endl;
-                        cout << "ParamStr: \t" << paramString << endl;
-                        cout << "Container: \t" << paramContainer << endl;
-                        
-                    }
-                    else
-                    {
-                        found = true;
-                        paramContainer=paramContainer;
-;
-                        cout << "FINAL: " <<paramContainer << " rows: " << rows << " columns: " << columns << endl;
-                    }
-                    
+						// 6. Lets count the number of rows
+						rows++;
+	                }
+                    else {found = true;}						// Once we get to ; then we can exit the loop
                 }
                 found = true;
             }
         }
     }
     
+    // 7. Make the final variable as a char*
+    char* charContainer = new char[paramContainer.length() +1];	// Convert the container to a char*
+    strcpy(charContainer, paramContainer.c_str());				// Assign the right values
     
-    // count the spaces. Single space separates values so length of vector is #spaces + 1.
-    char* charContainer = new char[paramContainer.length() +1];
-    strcpy(charContainer, paramContainer.c_str());
-	cout << "charContainer: " << charContainer << endl;
-    nullTerminal = strlen(charContainer);		// This gets the length of the char string
+	
+	// 8. Count total nr of elements in the variables count the spaces
+	nullTerminal = strlen(charContainer);						// This gets the length of the char string
     int count = 0;
-    for(int j=0;j<nullTerminal;j++)
-        if(paramContainer[j]==' ') count++;
-    
-    //nElements = count+ 1;
+	for(int j=0;j<nullTerminal;j++) {if(paramContainer[j]==' ') {count++;}}
     nElements=count + 1;
-    cout << "NElements: " << nElements << endl;
     
     paramFileStream.close();
     
