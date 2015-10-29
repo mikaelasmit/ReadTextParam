@@ -93,7 +93,7 @@ char* CParamReader::getParamString(const char* paramName, int& nElements, int& r
                     paramFileStream.getline(paramBuffer,BUFFER_SIZE-1);         // this updates 'token'
                     
                     // We will run this until we find the ; - which annotes end of the variable data
-                    if (token[0]!=';' && token[0]!=' ')
+                    if (token[0]!=';' && token[0]!=' '&& token[0]!=NULL)
                     {
                         // 2. Remove any extra spaces from the end of the string (as long as the string isn't zero lnegth).
                         nullTerminal = strlen(token);		// This gets the length of the char string
